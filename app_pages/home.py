@@ -24,7 +24,7 @@ def show_home_page():
         1. **Browse Subject-Specific Prompts** - Find ready-to-use prompts for your subjects
         2. **Learn Prompt Techniques** - Master the art of effective AI communication  
         3. **Use the Prompt Builder** - Create custom prompts with guided assistance
-        4. **Test Your Prompts** - See how they perform with real AI models
+        4. **Copy and Use** - Take your prompts to any AI system
         5. **Save Your Favorites** - Keep track of prompts that work well for you
         """)
 

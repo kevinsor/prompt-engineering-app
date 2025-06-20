@@ -6,7 +6,6 @@ from app_pages.home import show_home_page
 from app_pages.subject_prompts import show_subject_prompts
 from app_pages.prompt_techniques import show_prompt_techniques
 from app_pages.prompt_builder import show_prompt_builder
-from app_pages.test_prompts import show_test_prompts
 from app_pages.tips_practices import show_tips_and_practices
 from app_pages.my_prompts import show_my_prompts
 
@@ -23,7 +22,7 @@ def main():
     initialize_session_state()
 
     # Main header
-    st.markdown('<h1 class="main-header">🎓 Student AI Prompt Engineering Helper</h1>', unsafe_allow_html=True)
+    st.markdown('<h1 class="main-header">🎓 Student AI Prompt Engineering Hub</h1>', unsafe_allow_html=True)
 
     # Render sidebar and get selected page
     page = render_sidebar()
@@ -37,8 +36,6 @@ def main():
         show_prompt_techniques()
     elif page == "🔧 Prompt Builder":
         show_prompt_builder()
-    elif page == "🧪 Test Prompts":
-        show_test_prompts()
     elif page == "💡 Tips & Best Practices":
         show_tips_and_practices()
     elif page == "📝 My Prompts":
