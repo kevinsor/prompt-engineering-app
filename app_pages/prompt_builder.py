@@ -9,16 +9,6 @@ def show_prompt_builder():
 
     st.write("Create powerful, educational prompts that get better AI responses and enhance your learning!")
 
-    # Quick tips
-    st.markdown("""
-    <div class="tip-box">
-    <strong>💡 Pro Tips for Better Prompts:</strong><br>
-    • Always specify your grade level and current understanding<br>
-    • Ask AI to take on a teaching role (tutor, coach, teacher)<br>
-    • Request step-by-step guidance rather than direct answers<br>
-    • Ask for examples and connections to what you already know
-    </div>
-    """, unsafe_allow_html=True)
 
     with st.form("advanced_prompt_builder"):
         # Educational Context Section
@@ -296,52 +286,3 @@ def show_prompt_builder():
                     st.success("Prompt saved!")
                 else:
                     st.info("This prompt is already saved!")
-        with col2:
-            if st.button("🧪 Test This Prompt"):
-                st.session_state.prompt_to_test = st.session_state.current_generated_prompt['prompt']
-                st.session_state.test_prompt_source = f"Advanced Builder - {st.session_state.current_generated_prompt['topic']}"
-                st.success("Prompt loaded for testing! Go to Test Prompts page.")
-
-    # Educational guidance
-    st.markdown("---")
-    st.markdown("### 📚 Prompt Building Tips")
-
-    tab1, tab2, tab3 = st.tabs(["🎯 Key Elements", "📖 Examples", "🔄 Iteration"])
-
-    with tab1:
-        st.markdown("""
-        <div class="tip-box">
-        <strong>Essential Elements of Educational Prompts:</strong><br><br>
-
-        <strong>1. Role Assignment</strong> - "Act as my tutor/teacher/coach"<br>
-        <strong>2. Learning Context</strong> - Your grade level and current understanding<br>
-        <strong>3. Specific Request</strong> - Exactly what you want to learn or accomplish<br>
-        <strong>4. Interaction Style</strong> - How you want AI to teach you<br>
-        <strong>5. Success Criteria</strong> - How you'll know you understand
-        </div>
-        """, unsafe_allow_html=True)
-
-    with tab2:
-        st.markdown("""
-        <div class="prompt-example">
-        <strong>Example: From Weak to Strong Prompt</strong><br><br>
-
-        <strong>❌ Weak:</strong> "Help me with algebra"<br><br>
-
-        <strong>✅ Strong:</strong> "Act as my patient algebra tutor. I'm a 9th grader who understands basic equations like 2x + 5 = 11, but I get confused when there are x² terms. Please guide me step-by-step through solving x² + 5x + 6 = 0 using the quadratic formula. Check my understanding at each step by asking me to explain what we're doing and why."
-        </div>
-        """, unsafe_allow_html=True)
-
-    with tab3:
-        st.markdown("""
-        <div class="warning-box">
-        <strong>Improving Your Prompts:</strong><br><br>
-
-        <strong>Start Simple</strong> → Test your prompt → <strong>Add Detail</strong> → Test again → <strong>Refine</strong><br><br>
-
-        • If AI gives too basic info: Add more about your current knowledge<br>
-        • If AI is too advanced: Specify your beginner level more clearly<br>
-        • If AI just gives answers: Ask for guidance and questions instead<br>
-        • If AI is too wordy: Request specific formats or shorter explanations
-        </div>
-        """, unsafe_allow_html=True)

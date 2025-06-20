@@ -1,19 +1,32 @@
 import streamlit as st
 from datetime import datetime
-from data.constants import SUBJECT_PROMPTS
-from utils.copy_utils import create_copy_button
+
+
+# Lazy imports for better performance
+def get_subject_prompts():
+    from data.constants import get_subject_prompts
+    return get_subject_prompts()
+
+
+def get_copy_utils():
+    from utils.copy_utils import create_copy_button
+    return create_copy_button
 
 
 def show_subject_prompts():
     """Display subject-specific prompt templates"""
     st.markdown('<h2 class="section-header">📚 Subject-Specific Prompt Templates</h2>', unsafe_allow_html=True)
 
+    # Get data and utilities
+    subject_prompts = get_subject_prompts()
+    create_copy_button = get_copy_utils()
+
     # Subject selection
-    selected_subject = st.selectbox("Choose your subject:", list(SUBJECT_PROMPTS.keys()))
+    selected_subject = st.selectbox("Choose your subject:", list(subject_prompts.keys()))
 
     st.markdown(f"### {selected_subject} Prompts")
 
-    for category, prompt in SUBJECT_PROMPTS[selected_subject].items():
+    for category, prompt in subject_prompts[selected_subject].items():
         with st.expander(f"📋 {category}"):
             st.markdown(f"""
             <div class="prompt-example">
