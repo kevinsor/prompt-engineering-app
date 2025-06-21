@@ -8,11 +8,19 @@ def show_prompt_builder():
     st.markdown('<h2 class="section-header">🔧 Advanced Prompt Builder</h2>', unsafe_allow_html=True)
 
     st.write("Create powerful, educational prompts that get better AI responses and enhance your learning!")
+    
+    # Progress indicator
+    progress_placeholder = st.empty()
+    progress_placeholder.progress(0, "Getting started...")
 
 
     with st.form("advanced_prompt_builder"):
+        # Update progress
+        progress_placeholder.progress(0.1, "Setting up form...")
+        
         # Educational Context Section
         st.markdown("### 🎓 Educational Context")
+        st.markdown("*Tell us about your learning situation*")
         col1, col2 = st.columns(2)
 
         with col1:
@@ -20,6 +28,7 @@ def show_prompt_builder():
                 "Your Grade Level:",
                 ["Elementary (K-5)", "Middle School (6-8)", "High School (9-12)", "College/University",
                  "Graduate School"],
+                index=2,  # Default to High School
                 help="This helps AI adjust language and examples to your level"
             )
 
@@ -54,11 +63,13 @@ def show_prompt_builder():
                     "Good understanding - just need help with specific parts",
                     "Advanced - want to deepen or extend my knowledge"
                 ],
+                index=1,  # Default to Basic understanding
                 help="Helps AI know where to start and how much detail to provide"
             )
 
         # AI Role & Approach Section
         st.markdown("### 👨‍🏫 AI Teaching Role & Approach")
+        st.markdown("*Choose how you want the AI to help you learn*")
         col1, col2 = st.columns(2)
 
         with col1:
@@ -72,6 +83,7 @@ def show_prompt_builder():
                     "Research assistant - help me find and organize information",
                     "Practice partner - quiz me and give feedback"
                 ],
+                index=0,  # Default to Patient tutor
                 help="Different roles provide different types of educational support"
             )
 
@@ -89,6 +101,13 @@ def show_prompt_builder():
             )
 
         with col2:
+            # Smart defaults for feedback based on learning goal
+            default_feedback = ["Check my understanding along the way"]
+            if learning_goal == "Prepare for a test or assignment":
+                default_feedback.extend(["Point out common mistakes to avoid", "Give me practice problems at different difficulty levels"])
+            elif learning_goal == "Understand a concept I'm confused about":
+                default_feedback.append("Help me make connections between topics")
+            
             feedback_preference = st.multiselect(
                 "What kind of feedback do you want?",
                 [
@@ -99,18 +118,28 @@ def show_prompt_builder():
                     "Give me practice problems at different difficulty levels",
                     "Help me make connections between topics"
                 ],
-                help="Select all types of feedback that would help your learning"
+                default=default_feedback,
+                help="Select all types of feedback that would help your learning (smart defaults applied)"
             )
 
         # Specific Learning Request
         st.markdown("### 📝 Your Specific Learning Request")
+        st.markdown("*The most important part - be specific!*")
 
         topic_or_question = st.text_area(
-            "What specific topic, question, or problem do you need help with?",
+            "What specific topic, question, or problem do you need help with? *",
             height=100,
             placeholder="Be as specific as possible. For example: 'solving quadratic equations with the quadratic formula' rather than just 'algebra'",
             help="The more specific you are, the better help you'll get"
         )
+        
+        # Character counter and validation hints
+        if topic_or_question:
+            char_count = len(topic_or_question)
+            if char_count < 10:
+                st.warning("⚠️ Consider adding more detail for better results (current: {} characters)".format(char_count))
+            elif char_count > 20:
+                st.success("✅ Good detail level (current: {} characters)".format(char_count))
 
         background_context = st.text_area(
             "Additional context (what you already know, what you've tried, what's confusing you):",
@@ -121,9 +150,18 @@ def show_prompt_builder():
 
         # Output Preferences
         st.markdown("### 📊 How You Want the Response Structured")
+        st.markdown("*Control the format and detail level*")
         col1, col2 = st.columns(2)
 
         with col1:
+            # Smart defaults based on grade level and subject
+            default_formats = ["Step-by-step explanations", "Real-world examples and analogies"]
+            if grade_level in ["Elementary (K-5)", "Middle School (6-8)"]:
+                default_formats.append("Visual descriptions or diagrams")
+            if subject_area == "Mathematics":
+                if "Practice problems with solutions" not in default_formats:
+                    default_formats.append("Practice problems with solutions")
+            
             response_format = st.multiselect(
                 "Response format preferences:",
                 [
@@ -135,8 +173,8 @@ def show_prompt_builder():
                     "Summary of key points",
                     "Questions to test my understanding"
                 ],
-                default=["Step-by-step explanations", "Real-world examples and analogies"],
-                help="Choose formats that help you learn best"
+                default=default_formats,
+                help="Choose formats that help you learn best (smart defaults applied based on your selections)"
             )
 
         with col2:
@@ -154,7 +192,7 @@ def show_prompt_builder():
             )
 
         # Advanced Options
-        with st.expander("🔬 Advanced Options"):
+        with st.expander("🔬 Advanced Options (Optional)"):
             st.markdown("**Learning Style Preferences:**")
             learning_styles = st.multiselect(
                 "How do you learn best?",
@@ -179,11 +217,28 @@ def show_prompt_builder():
                 prerequisite_check = st.checkbox("Check if I'm missing prerequisite knowledge")
 
         # Generate Prompt Button
-        submitted = st.form_submit_button("🚀 Generate Educational Prompt", type="primary")
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            submitted = st.form_submit_button("🚀 Generate Educational Prompt", type="primary", use_container_width=True)
 
     # Handle form submission
     if submitted:
-        if topic_or_question.strip():
+        # Update progress
+        progress_placeholder.progress(0.3, "Validating form...")
+        
+        # Enhanced validation
+        errors = []
+        if not topic_or_question.strip():
+            errors.append("Please enter a specific topic or question")
+        elif len(topic_or_question.strip()) < 5:
+            errors.append("Please provide more detail about your topic (at least 5 characters)")
+        
+        if errors:
+            for error in errors:
+                st.error(f"❌ {error}")
+            st.info("💡 Tip: The more specific you are, the better your AI tutor can help you!")
+        else:
+            progress_placeholder.progress(0.5, "Building your personalized prompt...")
             # Collect all form data
             prompt_data = {
                 'grade_level': grade_level,
@@ -206,7 +261,9 @@ def show_prompt_builder():
             }
 
             # Generate the advanced prompt
+            progress_placeholder.progress(0.7, "Generating prompt...")
             generated_prompt = build_advanced_prompt(prompt_data)
+            progress_placeholder.progress(1.0, "Complete! ✨")
 
             # Store in session state
             st.session_state.current_generated_prompt = {
@@ -220,27 +277,119 @@ def show_prompt_builder():
             # Display the generated prompt
             st.markdown("### 🎉 Your Educational Prompt")
             st.markdown("**Ready to copy and use with any AI system:**")
+            
+            # Enhanced prompt display with copy button
+            col_prompt, col_copy = st.columns([4, 1])
+            with col_prompt:
+                st.markdown(f"""
+                <div class="prompt-example">
+                {generated_prompt}
+                </div>
+                """, unsafe_allow_html=True)
+            
+            with col_copy:
+                st.markdown("<br>", unsafe_allow_html=True)  # Add some spacing
+                if st.button("📋 Copy", help="Copy prompt to clipboard", use_container_width=True):
+                    st.code(generated_prompt, language=None)
+                    st.success("✅ Prompt copied! Paste it into your AI chat.")
 
-            st.markdown(f"""
-            <div class="prompt-example">
-            {generated_prompt}
-            </div>
-            """, unsafe_allow_html=True)
-
-            # Action buttons
-            col1, col2, col3 = st.columns([1, 1, 2])
+            # Enhanced action buttons
+            st.markdown("---")
+            col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
+            
             with col1:
-                if st.button("💾 Save This Prompt"):
-                    st.session_state.user_prompts.append(st.session_state.current_generated_prompt)
-                    st.success("Prompt saved!")
+                if st.button("💾 Save Prompt", use_container_width=True):
+                    if st.session_state.current_generated_prompt not in st.session_state.get('user_prompts', []):
+                        if 'user_prompts' not in st.session_state:
+                            st.session_state.user_prompts = []
+                        st.session_state.user_prompts.append(st.session_state.current_generated_prompt)
+                        st.success("✅ Prompt saved!")
+                    else:
+                        st.info("💾 Already saved!")
+            
             with col2:
-                if st.button("🧪 Test This Prompt"):
+                if st.button("🧪 Test Prompt", use_container_width=True):
                     st.session_state.prompt_to_test = generated_prompt
                     st.session_state.test_prompt_source = f"Advanced Builder - {topic_or_question[:30]}..."
-                    st.success("Prompt loaded for testing! Go to Test Prompts page.")
+                    st.success("✅ Ready to test! Go to Test Prompts page.")
+            
+            with col3:
+                if st.button("✏️ Edit Prompt", use_container_width=True, help="Customize the generated prompt"):
+                    st.session_state.show_prompt_editor = True
+            
+            with col4:
+                # Export options
+                prompt_text = f"""# Educational Prompt Generated {datetime.now().strftime('%Y-%m-%d %H:%M')}
 
-            # Explanation of prompt components
-            with st.expander("🔍 Understanding Your Generated Prompt"):
+**Topic:** {topic_or_question}
+**Subject:** {subject_area}
+**Grade Level:** {grade_level}
+
+## Generated Prompt:
+{generated_prompt}
+
+---
+Generated using Advanced Prompt Builder"""
+                
+                st.download_button(
+                    "📎 Export",
+                    prompt_text,
+                    file_name=f"prompt_{datetime.now().strftime('%Y%m%d_%H%M')}.txt",
+                    mime="text/plain",
+                    use_container_width=True,
+                    help="Download as text file"
+                )
+            
+            # Prompt Editor
+            if st.session_state.get('show_prompt_editor', False):
+                st.markdown("---")
+                st.markdown("### ✏️ Edit Your Prompt")
+                
+                edited_prompt = st.text_area(
+                    "Customize your prompt:",
+                    value=generated_prompt,
+                    height=200,
+                    help="Make any changes you want to the generated prompt"
+                )
+                
+                col_save, col_cancel = st.columns([1, 1])
+                with col_save:
+                    if st.button("✅ Save Changes", type="primary", use_container_width=True):
+                        # Update the generated prompt
+                        st.session_state.current_generated_prompt['prompt'] = edited_prompt
+                        st.session_state.show_prompt_editor = False
+                        st.success("Prompt updated!")
+                        st.rerun()
+                
+                with col_cancel:
+                    if st.button("❌ Cancel", use_container_width=True):
+                        st.session_state.show_prompt_editor = False
+                        st.rerun()
+
+            # Quick Preview Section
+            with st.expander("🔎 Quick Preview - How This Prompt Works"):
+                st.markdown("**This is what your AI assistant will understand:**")
+                preview_parts = []
+                
+                if prompt_data['ai_role']:
+                    preview_parts.append(f"• **Role**: Acts as your {prompt_data['ai_role'].split(' - ')[0].lower()}")
+                if prompt_data['grade_level']:
+                    preview_parts.append(f"• **Level**: Explains things for {prompt_data['grade_level'].lower()} level")
+                if prompt_data['current_understanding']:
+                    understanding = prompt_data['current_understanding'].split(' - ')[0]
+                    preview_parts.append(f"• **Starting Point**: Knows you have {understanding.lower()}")
+                if prompt_data['interaction_style']:
+                    style = prompt_data['interaction_style'].lower()
+                    preview_parts.append(f"• **Teaching Style**: Will {style}")
+                
+                for part in preview_parts[:4]:  # Show top 4 most important parts
+                    st.markdown(part)
+                
+                if len(preview_parts) > 4:
+                    st.markdown(f"*...and {len(preview_parts) - 4} more customizations*")
+            
+            # Detailed explanation
+            with st.expander("🔍 Full Prompt Analysis"):
                 st.markdown("**Your prompt includes these educational elements:**")
 
                 components = []
@@ -263,8 +412,10 @@ def show_prompt_builder():
                 st.markdown(
                     "**💡 Pro Tip**: This prompt structure works with any AI system - ChatGPT, Claude, Gemini, etc.!")
 
-        else:
-            st.warning("Please enter a specific topic or question to generate your prompt.")
+            # Clear progress indicator after brief delay
+            import time
+            time.sleep(0.5)
+            progress_placeholder.empty()
 
     # Display previously generated prompt if exists
     elif 'current_generated_prompt' in st.session_state:
@@ -277,12 +428,72 @@ def show_prompt_builder():
         </div>
         """, unsafe_allow_html=True)
 
-        # Action buttons for existing prompt
-        col1, col2, col3 = st.columns([1, 1, 2])
+        # Enhanced action buttons for existing prompt
+        col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
+        
         with col1:
-            if st.button("💾 Save This Prompt"):
+            if st.button("💾 Save Prompt", key="save_existing", use_container_width=True):
+                if 'user_prompts' not in st.session_state:
+                    st.session_state.user_prompts = []
                 if st.session_state.current_generated_prompt not in st.session_state.user_prompts:
                     st.session_state.user_prompts.append(st.session_state.current_generated_prompt)
-                    st.success("Prompt saved!")
+                    st.success("✅ Prompt saved!")
                 else:
-                    st.info("This prompt is already saved!")
+                    st.info("💾 Already saved!")
+        
+        with col2:
+            if st.button("🧪 Test Prompt", key="test_existing", use_container_width=True):
+                st.session_state.prompt_to_test = st.session_state.current_generated_prompt['prompt']
+                st.session_state.test_prompt_source = f"Saved Prompt - {st.session_state.current_generated_prompt['topic']}"
+                st.success("✅ Ready to test!")
+        
+        with col3:
+            if st.button("✏️ Edit", key="edit_existing", use_container_width=True):
+                st.session_state.show_existing_editor = True
+        
+        # Editor for existing prompt
+        if st.session_state.get('show_existing_editor', False):
+            st.markdown("---")
+            st.markdown("### ✏️ Edit Saved Prompt")
+            
+            edited_existing = st.text_area(
+                "Customize your saved prompt:",
+                value=st.session_state.current_generated_prompt['prompt'],
+                height=200,
+                key="edit_existing_text"
+            )
+            
+            col_save, col_cancel = st.columns([1, 1])
+            with col_save:
+                if st.button("✅ Save Changes", key="save_existing_changes", type="primary", use_container_width=True):
+                    st.session_state.current_generated_prompt['prompt'] = edited_existing
+                    st.session_state.show_existing_editor = False
+                    st.success("Prompt updated!")
+                    st.rerun()
+            
+            with col_cancel:
+                if st.button("❌ Cancel", key="cancel_existing_edit", use_container_width=True):
+                    st.session_state.show_existing_editor = False
+                    st.rerun()
+        
+        with col4:
+            prompt_text = f"""# Educational Prompt
+
+**Topic:** {st.session_state.current_generated_prompt['topic']}
+**Subject:** {st.session_state.current_generated_prompt['subject']}
+**Date:** {st.session_state.current_generated_prompt['date']}
+
+## Generated Prompt:
+{st.session_state.current_generated_prompt['prompt']}
+
+---
+Generated using Advanced Prompt Builder"""
+            
+            st.download_button(
+                "📎 Export",
+                prompt_text,
+                file_name=f"prompt_{st.session_state.current_generated_prompt['date'].replace(' ', '_').replace(':', '')}.txt",
+                mime="text/plain",
+                key="export_existing",
+                use_container_width=True
+            )
